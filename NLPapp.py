@@ -1,5 +1,5 @@
 import streamlit as st
-!pip install spacy-streamlit
+#!pip install spacy-streamlit
 import spacy_streamlit
 import spacy
 from PIL import Image
