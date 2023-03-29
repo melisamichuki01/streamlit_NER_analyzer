@@ -1,10 +1,11 @@
 import streamlit as st
-#import spacy_streamlit
+import spacy_streamlit
 import spacy
 from PIL import Image
 import os
 
 # Load the SpaCy model
+#install en_core_web_sm then 
 spacy_model = "en_core_web_sm"
 nlp = spacy.load(spacy_model)
 
