@@ -1,5 +1,5 @@
 import streamlit as st
-import spacy_streamlit
+#import spacy_streamlit
 import spacy
 from PIL import Image
 import os
