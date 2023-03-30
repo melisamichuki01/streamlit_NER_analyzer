@@ -1,57 +1,72 @@
 import streamlit as st
-import spacy_streamlit
-import spacy
 from PIL import Image
 import os
 
-# Load the SpaCy model
-#install en_core_web_sm then 
-spacy_model = "en_core_web_sm"
-nlp = spacy.load(spacy_model)
+# Importing Obsei libraries
+from obsei.analyzer.spacy_analyzer import SpacyAnalyzer
+from obsei.sink.streamlit_sink import StreamlitSink
+from obsei.source.text_input_source import TextInputSource
+from obsei.pipeline.simple_pipeline import SimplePipeline
 
-# Define a function to load an image
-@st.cache
-def load_image(img):
-    im = Image.open(img)
-    return im
+# Loading spacy model
+spacy_analyzer = SpacyAnalyzer(model_name='en_core_web_sm')
 
-# Define the layout templates
-title_temp ="""
+# Initializing StreamlitSink
+streamlit_sink = StreamlitSink()
+
+# Layout Templates
+title_temp = """
     <div style="background-color:#464e5f;padding:10px;border-radius:10px;margin:10px;">
-    <h4 style="color:white;text-align:center;">SpaCy Streamlit</h1>
+    <h4 style="color:white;text-align:center;">Obsei Streamlit</h1>
     </div>
     """
 
 def main():
-    # Set the page title and favicon
-    st.set_page_config(page_title='SpaCy Streamlit App', page_icon=':ner:')
+    st.set_page_config(page_title='Obsei Streamlit App', page_icon=':ner:')
     
     # Add a title and image to the page
-    st.title("SpaCy Streamlit App")
+    st.title("Obsei Streamlit App")
     our_image = load_image(os.path.join('SpaCy_logo.svg.png'))
     st.image(our_image)
 
-    # Define the menu options
-    menu = ['Home', 'Named Entity Recognition']
-    choice = st.sidebar.selectbox('Select an option', menu)
+    menu = ['Home', 'NER']
+    choice = st.sidebar.selectbox('Menu', menu)
 
-    # Define the "Home" page
     if choice == 'Home':
         st.subheader('Home')
-        # Add a file uploader for input
-        raw_docx = st.file_uploader('Upload a document', type=['txt'])
-        # If the user uploads a file and clicks the "Tokenize" button, visualize the tokens
-        if raw_docx is not None and st.button('Tokenize'):
-            spacy_streamlit.visualize_tokens(nlp(raw_docx.read().decode()), attrs=["text", "pos_", "dep_", "ent_type_"])
+        raw_docx = st.text_area('Your Docs', 'Enter Text')
+        if st.button("Analyze"):
+            # Initializing TextInputSource
+            text_input_source = TextInputSource(
+                text = raw_docx,
+                name = 'TextInputSource'
+            )
 
-    # Define the "Named Entity Recognition" page
-    elif choice == 'Named Entity Recognition':
-        st.subheader('Named Entity Recognition')
-        # Add a text area for input
-        raw_docx = st.text_area('Enter some text', 'Type here...')
-        # If the user clicks the "Analyze" button, visualize the entities
+            # Initializing SimplePipeline
+            pipeline = SimplePipeline([
+                spacy_analyzer,
+            ], text_input_source, streamlit_sink)
+
+            # Running the pipeline
+            pipeline.run()
+
+    elif choice == 'NER':
+        st.subheader('Named Entity Recognizer')
+        raw_docx = st.text_area('Your Text', 'Enter Text')
         if st.button('Analyze'):
-            spacy_streamlit.visualize_ner(nlp(raw_docx), labels=nlp.get_pipe("ner").labels)
+            # Initializing TextInputSource
+            text_input_source = TextInputSource(
+                text = raw_docx,
+                name = 'TextInputSource'
+            )
+
+            # Initializing SimplePipeline
+            pipeline = SimplePipeline([
+                spacy_analyzer,
+            ], text_input_source, streamlit_sink)
+
+            # Running the pipeline
+            pipeline.run()
 
 if __name__ == '__main__':
     main()
